@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: tres_db
+    restart: always
+    environment:
+      POSTGRES_USER: tres_user
+      POSTGRES_PASSWORD: tres_password
+      POSTGRES_DB: tres_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - tres_net
+
+  backend:
+    build: ./backend
+    container_name: tres_backend
+    restart: always
+    ports:
+      - "8080:8080" 
+    environment:
+      - DATABASE_URL=postgres://tres_user:tres_password@db:5432/tres_db?sslmode=disable
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+    networks:
+      - tres_net
+
+volumes:
+  postgres_data:
+
+networks:
+  tres_net:
